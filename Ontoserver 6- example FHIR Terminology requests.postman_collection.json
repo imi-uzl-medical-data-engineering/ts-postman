@@ -1,0 +1,1274 @@
+{
+	"info": {
+		"_postman_id": "fb95a213-ff25-4253-8b02-9368f2e59cc9",
+		"name": "Ontoserver 6: example FHIR Terminology requests",
+		"description": "Example usage of FHIR Terminology Services\n\nYou will need to set the global variable url to your FHIR endpoint.\n\nFor Ontoserver, set it to\n\nhttps://r4.ontoserver.csiro.au/fhir\n",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28381475",
+		"_collection_link": "https://www.postman.com/jimsteel/workspace/ontoserver/collection/784165-fb95a213-ff25-4253-8b02-9368f2e59cc9?action=share&source=collection_link&creator=28381475"
+	},
+	"item": [
+		{
+			"name": "AuditEvent Examples",
+			"item": [
+				{
+					"name": "{{url}}/AuditEvent",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\": \"AuditEvent\",\n  \"type\": {\n    \"system\": \"http://ontoserver.csiro.au/CodeSystem/ontoserver-reporting\",\n    \"code\": \"code-selected\",\n    \"display\": \"Code Selected\"\n  },\n  \"action\": \"E\",\n  \"recorded\": \"2017-06-02T22:04:27+11:00\",\n  \"outcome\": \"0\",\n  \"agent\": [\n    {\n      \"requestor\": false\n    }\n  ],\n  \"source\": {\n    \"site\": \"IT Department\",\n    \"observer\": {\n      \"display\": \"John's Laptop\"\n    }\n  },\n  \"entity\": [\n    {\n      \"what\": {\n        \"identifier\": {\n          \"system\": \"http://snomed.info/sct\",\n          \"value\": \"127949000\"\n        }\n      },\n      \"name\": \"selected code\",\n      \"detail\": [{\n          \"type\": \"searchPath\",\n          \"valueString\": \"/ValueSet/$expand?url=http://snomed.info/sct?fhir_vs=refset/32570061000036105&filter=elbow&count=10\"\n        },\n        {\n          \"type\": \"valueSetExpansionUrl\",\n          \"valueString\": \"http://snomed.info/sct?fhir_vs=refset/32570061000036105\"\n        },\n        {\n          \"type\": \"valueSetExpansionFilter\",\n          \"valueString\": \"elbow\"\n        },\n        {\n          \"type\": \"indexInSearchResult\",\n          \"valueString\": \"2\"\n        }\n      ]\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{url}}/AuditEvent",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"AuditEvent"
+							]
+						},
+						"description": "Create an AuditEvent resource to indicate the selection of a code following a search (ValueSet $expand with filter)"
+					},
+					"response": []
+				}
+			],
+			"description": "Examples demonstrating the use of the AuditEvent resource"
+		},
+		{
+			"name": "Batch Examples",
+			"item": [
+				{
+					"name": "Batch $lookup",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/fhir+json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/fhir+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"type\" : \"batch\",\n   \"resourceType\" : \"Bundle\",\n   \"entry\" : [\n      {\n         \"request\" : {\n            \"method\" : \"POST\",\n            \"url\" : \"CodeSystem/$lookup\"\n         },\n         \"resource\" : {\n            \"resourceType\" : \"Parameters\",\n            \"parameter\" : [\n               {\n                  \"valueUri\" : \"http://loinc.org\",\n                  \"name\" : \"system\"\n               },\n               {\n                  \"valueCode\" : \"23245-4\",\n                  \"name\" : \"code\"\n               }\n            ]\n         }\n      },\n      {\n         \"resource\" : {\n            \"parameter\" : [\n               {\n                  \"name\" : \"system\",\n                  \"valueUri\" : \"http://snomed.info/sct\"\n               },\n               {\n                  \"valueCode\" : \"17311000168105\",\n                  \"name\" : \"code\"\n               }\n            ],\n            \"resourceType\" : \"Parameters\"\n         },\n         \"request\" : {\n            \"method\" : \"POST\",\n            \"url\" : \"CodeSystem/$lookup\"\n         }\n      }\n   ]\n}\n"
+						},
+						"url": {
+							"raw": "{{url}}",
+							"host": [
+								"{{url}}"
+							]
+						},
+						"description": "The request sends two lookups - one of a LOINC code and one of a SNOMED CT code."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Closure Examples",
+			"item": [
+				{
+					"name": "Step 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"Response body is ConceptMap\"] = jsonData.resourceType === 'ConceptMap';",
+									"tests[\"ConceptMap is empty\"] = typeof jsonData.element === 'undefined';",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\" : \"Parameters\",\n  \"parameter\" : [\n    {\n      \"name\" : \"name\",\n      \"valueString\" : \"49088976-d54d-4d19-b868-3d4c18cebabb\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{url}}/$closure",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"$closure"
+							]
+						},
+						"description": "Initialise the closure table"
+					},
+					"response": []
+				},
+				{
+					"name": "Step 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"Response body is ConceptMap\"] = jsonData.resourceType === 'ConceptMap';",
+									"tests[\"ConceptMap is empty\"] = typeof jsonData.element === 'undefined';",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\" : \"Parameters\",\n  \"parameter\" : [\n    {\n      \"name\" : \"name\",\n      \"valueString\" : \"49088976-d54d-4d19-b868-3d4c18cebabb\"\n    },\n    {\n      \"name\" : \"concept\",\n      \"valueCoding\" : {\n        \"system\" : \"http://snomed.info/sct\",\n        \"code\" : \"22298006\"\n      }\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{url}}/$closure",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"$closure"
+							]
+						},
+						"description": "Adding an initial concept to the table should not generate an entry in the resulting ConceptMap."
+					},
+					"response": []
+				},
+				{
+					"name": "Step 3",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"Response body is ConceptMap\"] = jsonData.resourceType === 'ConceptMap';",
+									"tests[\"ConceptMap is not empty\"] = typeof jsonData.group !== 'undefined';",
+									"tests[\"ConceptMap has one group\"] = jsonData.group.length === 1;",
+									"tests[\"ConceptMap has one element\"] = jsonData.group[0].element.length === 1;",
+									"tests[\"ConceptMap expected source value\"] = jsonData.group[0].element[0].code === '22298006';",
+									"tests[\"ConceptMap expected target value\"] = jsonData.group[0].element[0].target[0].code === '128599005';",
+									"tests[\"ConceptMap expected target relationship\"] = jsonData.group[0].element[0].target[0].equivalence === 'subsumes';",
+									"",
+									"",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\" : \"Parameters\",\n  \"parameter\" : [\n    {\n      \"name\" : \"name\",\n      \"valueString\" : \"49088976-d54d-4d19-b868-3d4c18cebabb\"\n    },\n    {\n      \"name\" : \"concept\",\n      \"valueCoding\" : {\n        \"system\" : \"http://snomed.info/sct\",\n        \"code\" : \"128599005\"\n      }\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{url}}/$closure",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"$closure"
+							]
+						},
+						"description": "Adding a second concept to the table should generate an entry in the resulting ConceptMap."
+					},
+					"response": []
+				},
+				{
+					"name": "Step 4",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\" : \"Parameters\",\n  \"parameter\" : [\n    {\n      \"name\" : \"name\",\n      \"valueString\" : \"49088976-d54d-4d19-b868-3d4c18cebabb\"\n    },\n    {\n      \"name\" : \"concept\",\n      \"valueCoding\" : {\n        \"system\" : \"http://snomed.info/sct\",\n        \"code\" : \"301095005\"\n      }\n    },\n    {\n      \"name\" : \"concept\",\n      \"valueCoding\" : {\n        \"system\" : \"http://snomed.info/sct\",\n        \"code\" : \"298705000\"\n      }\n    },\n    {\n      \"name\" : \"concept\",\n      \"valueCoding\" : {\n        \"system\" : \"http://snomed.info/sct\",\n        \"code\" : \"282729004\"\n      }\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{url}}/$closure",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"$closure"
+							]
+						},
+						"description": "Adding multiple extra concepts may result in multiple maps."
+					},
+					"response": []
+				},
+				{
+					"name": "Step 5",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\" : \"Parameters\",\n  \"parameter\" : [\n    {\n      \"name\" : \"name\",\n      \"valueString\" : \"49088976-d54d-4d19-b868-3d4c18cebabb\"\n    },\n    {\n      \"name\" : \"version\",\n      \"valueId\" : \"0\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{url}}/$closure",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"$closure"
+							]
+						},
+						"description": "Reset to version 0 should give us all the edges computed so far."
+					},
+					"response": []
+				}
+			],
+			"description": "Example usage of the $closure operation.\n",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "CodeSystem Examples",
+			"item": [
+				{
+					"name": "Search all CodeSystems, return their names and urls",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/CodeSystem?_elements=name,url",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"CodeSystem"
+							],
+							"query": [
+								{
+									"key": "_elements",
+									"value": "name,url"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create/Update a Code System",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/fhir+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\" : \"CodeSystem\",\n  \"id\" : \"v3-EducationLevel\",\n  \"meta\" : {\n    \"lastUpdated\" : \"2018-08-12T00:00:00.000+10:00\"\n  },\n  \"text\" : {\n    \"status\" : \"generated\",\n    \"div\" : \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\"><p>Release Date: 2018-08-12</p>\\r\\n<table class=\\\"grid\\\">\\r\\n <tr><td><b>Level</b></td><td><b>Code</b></td><td><b>Display</b></td><td><b>Definition</b></td></tr>\\r\\n <tr><td>1</td><td>ASSOC<a name=\\\"v3-EducationLevel-ASSOC\\\"> </a></td><td>Associate's or technical degree complete</td><td>\\n                        Associate's or technical degree complete<br/>\\r\\n\\n                     </td></tr>\\r\\n <tr><td>1</td><td>BD<a name=\\\"v3-EducationLevel-BD\\\"> </a></td><td>College or baccalaureate degree complete</td><td>\\n                        College or baccalaureate degree complete<br/>\\r\\n\\n                     </td></tr>\\r\\n <tr><td>1</td><td>ELEM<a name=\\\"v3-EducationLevel-ELEM\\\"> </a></td><td>Elementary School</td><td>\\n                        Elementary School<br/>\\r\\n\\n                     </td></tr>\\r\\n <tr><td>1</td><td>GD<a name=\\\"v3-EducationLevel-GD\\\"> </a></td><td>Graduate or professional Degree complete</td><td>\\n                        Graduate or professional Degree complete<br/>\\r\\n\\n                     </td></tr>\\r\\n <tr><td>1</td><td>HS<a name=\\\"v3-EducationLevel-HS\\\"> </a></td><td>High School or secondary school degree complete</td><td>\\n                        High School or secondary school degree complete<br/>\\r\\n\\n                     </td></tr>\\r\\n <tr><td>1</td><td>PB<a name=\\\"v3-EducationLevel-PB\\\"> </a></td><td>Some post-baccalaureate education</td><td>\\n                        Some post-baccalaureate education<br/>\\r\\n\\n                     </td></tr>\\r\\n <tr><td>1</td><td>POSTG<a name=\\\"v3-EducationLevel-POSTG\\\"> </a></td><td>Doctoral or post graduate education</td><td>\\n                        Doctoral or post graduate education<br/>\\r\\n\\n                     </td></tr>\\r\\n <tr><td>1</td><td>SCOL<a name=\\\"v3-EducationLevel-SCOL\\\"> </a></td><td>Some College education</td><td>\\n                        Some College education<br/>\\r\\n\\n                     </td></tr>\\r\\n <tr><td>1</td><td>SEC<a name=\\\"v3-EducationLevel-SEC\\\"> </a></td><td>Some secondary or high school education</td><td>\\n                        Some secondary or high school education<br/>\\r\\n\\n                     </td></tr>\\r\\n</table>\\r\\n</div>\"\n  },\n  \"extension\" : [{\n    \"url\" : \"http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status\",\n    \"valueCode\" : \"external\"\n  },\n  {\n    \"url\" : \"http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm\",\n    \"valueInteger\" : 0\n  }],\n  \"url\" : \"http://terminology.hl7.org/CodeSystem/v3-EducationLevel\",\n  \"identifier\" : [{\n    \"system\" : \"urn:ietf:rfc:3986\",\n    \"value\" : \"urn:oid:2.16.840.1.113883.5.1077\"\n  }],\n  \"version\" : \"2018-08-12\",\n  \"name\" : \"v3.EducationLevel\",\n  \"title\" : \"v3 Code System EducationLevel\",\n  \"status\" : \"active\",\n  \"experimental\" : false,\n  \"date\" : \"2018-08-12T00:00:00+10:00\",\n  \"publisher\" : \"HL7, Inc\",\n  \"contact\" : [{\n    \"telecom\" : [{\n      \"system\" : \"url\",\n      \"value\" : \"http://hl7.org\"\n    }]\n  }],\n  \"description\" : \" Years of education that a person has completed\",\n  \"caseSensitive\" : true,\n  \"valueSet\" : \"http://terminology.hl7.org/ValueSet/v3-EducationLevel\",\n  \"hierarchyMeaning\" : \"is-a\",\n  \"content\" : \"complete\",\n  \"concept\" : [{\n    \"code\" : \"ASSOC\",\n    \"display\" : \"Associate's or technical degree complete\",\n    \"definition\" : \"Associate's or technical degree complete\"\n  },\n  {\n    \"code\" : \"BD\",\n    \"display\" : \"College or baccalaureate degree complete\",\n    \"definition\" : \"College or baccalaureate degree complete\"\n  },\n  {\n    \"code\" : \"ELEM\",\n    \"display\" : \"Elementary School\",\n    \"definition\" : \"Elementary School\"\n  },\n  {\n    \"code\" : \"GD\",\n    \"display\" : \"Graduate or professional Degree complete\",\n    \"definition\" : \"Graduate or professional Degree complete\"\n  },\n  {\n    \"code\" : \"HS\",\n    \"display\" : \"High School or secondary school degree complete\",\n    \"definition\" : \"High School or secondary school degree complete\"\n  },\n  {\n    \"code\" : \"PB\",\n    \"display\" : \"Some post-baccalaureate education\",\n    \"definition\" : \"Some post-baccalaureate education\"\n  },\n  {\n    \"code\" : \"POSTG\",\n    \"display\" : \"Doctoral or post graduate education\",\n    \"definition\" : \"Doctoral or post graduate education\"\n  },\n  {\n    \"code\" : \"SCOL\",\n    \"display\" : \"Some College education\",\n    \"definition\" : \"Some College education\"\n  },\n  {\n    \"code\" : \"SEC\",\n    \"display\" : \"Some secondary or high school education\",\n    \"definition\" : \"Some secondary or high school education\"\n  }]\n}"
+						},
+						"url": {
+							"raw": "{{url}}/CodeSystem/v3-EducationLevel",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"CodeSystem",
+								"v3-EducationLevel"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Read a Code System (as XML)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/CodeSystem/v3-EducationLevel?_format=xml",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"CodeSystem",
+								"v3-EducationLevel"
+							],
+							"query": [
+								{
+									"key": "_format",
+									"value": "xml"
+								}
+							]
+						},
+						"description": "Reads the latest version of a CodeSystem "
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a Code System",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/CodeSystem/v3-EducationLevel",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"CodeSystem",
+								"v3-EducationLevel"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search all CodeSystems with URLs starting with http://snomed.info",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/CodeSystem?url:below=http://snomed.info",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"CodeSystem"
+							],
+							"query": [
+								{
+									"key": "url:below",
+									"value": "http://snomed.info"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ConceptMap Examples",
+			"item": [
+				{
+					"name": "Search all ConceptMaps (in XML)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ConceptMap?_format=xml",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ConceptMap"
+							],
+							"query": [
+								{
+									"key": "_format",
+									"value": "xml"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create/Update a Concept Map",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\": \"ConceptMap\",\n  \"name\": \"EducationLevelMapping\",\n  \"title\": \"Education Level Mapping\",\n  \"meta\": {\n    \"profile\": [\n      \"http://hl7.org/fhir/StructureDefinition/shareableconceptmap\"\n    ]\n  },\n  \"status\": \"draft\",\n  \"contact\": [\n    {\n      \"telecom\": [\n        {\n          \"value\": \"john.smith@example.com\"\n        }\n      ],\n      \"name\": \"John Smith\"\n    }\n  ],\n  \"group\": [\n    {\n      \"source\": \"http://terminology.hl7.org/CodeSystem/v3-EducationLevel\",\n      \"target\": \"http://snomed.info/sct\",\n      \"element\": [\n        {\n          \"target\": [\n            {\n              \"code\": \"473461003\",\n              \"equivalence\": \"equivalent\"\n            }\n          ],\n          \"code\": \"HS\"\n        },\n        {\n          \"target\": [\n            {\n              \"code\": \"224300008\",\n              \"equivalence\": \"specializes\"\n            }\n          ],\n          \"code\": \"BD\"\n        }\n      ]\n    }\n  ],\n  \"url\": \"http://example.com/educationLevelMapping\",\n  \"description\": \"A mapping between v3 education levels and snomed\",\n  \"text\": {\n    \"status\": \"generated\",\n    \"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\"><h2>Education Level Mapping</h2><tt>http://example.com/educationLevelMapping</tt><p>A mapping between v3 education levels and snomed</p></div>\"\n  },\n  \"sourceUri\": \"http://terminology.hl7.org/ValueSet/v3-EducationLevel\",\n  \"date\": \"2020-01-31\",\n  \"experimental\": true,\n  \"version\": \"1\",\n  \"identifier\": {\n    \"system\": \"urn:ietf:rfc:3986\",\n    \"value\": \"edLvlMap\"\n  },\n  \"publisher\": \"Example Inc.\",\n  \"copyright\": \"Copyright Example Inc, 2016\",\n  \"targetUri\": \"http://snomed.info/sct?fhir_vs=isa/365460000\",\n  \"id\": \"v3-snomed-education-map\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/ConceptMap/v3-snomed-education-map",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ConceptMap",
+								"v3-snomed-education-map"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a ConceptMap (using a POST) from XML",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/fhir+xml"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "<ConceptMap xmlns=\"http://hl7.org/fhir\">\n    <meta>\n        <versionId value=\"1\"/>\n        <lastUpdated value=\"2016-07-25T16:06:02.659+10:00\"/>\n        <profile value=\"http://ns.electronichealth.net.au/fhir/StructureDefinition/ncts/profile/ConceptMap/general-concept-map/1.0.0\"/>\n    </meta>\n    <text>\n        <status value=\"generated\"/>\n        <div xmlns=\"http://www.w3.org/1999/xhtml\">\n            <h2>Procedure map</h2>\n            <tt>Procedure map.url</tt>\n            <p>Procedure map</p>\n        </div>\n    </text>\n    <sourceUri value=\"urn:Procedures_implicit123.url\"/>\n    <targetUri value=\"urn:Surgical_procedures.url\"/>\n    <url value=\"urn:Procedure_map.url\"/>\n    <identifier>\n        <system value=\"urn:Procedure_map.identifier.namespace\"/>\n        <value value=\"Procedure_map.Identifier\"/>\n    </identifier>\n    <version value=\"1\"/>\n    <name value=\"Procedure-map\"/>\n    <title value=\"Procedure map\"/>\n    <status value=\"draft\"/>\n    <experimental value=\"true\"/>\n    <publisher value=\"me\"/>\n    <date value=\"2016-07-21\"/>\n    <description value=\"Procedure map\"/>\n    <copyright value=\"copy\"/>\n    <group>\n        <source value=\"urn:Procedures.url\"/>\n        <target value=\"http://snomed.info/sct\"/>\n        <element>\n            <code value=\"1\"/>\n            <target>\n                <code value=\"133860004\"/>\n                <equivalence value=\"inexact\"/>\n            </target>\n        </element>\n        <element>\n            <code value=\"2\"/>\n            <target>\n                <code value=\"133860004\"/>\n                <equivalence value=\"inexact\"/>\n            </target>\n        </element>\n        <element>\n            <code value=\"3\"/>\n            <target>\n                <code value=\"119631007\"/>\n                <equivalence value=\"inexact\"/>\n            </target>\n        </element>\n    </group>\n</ConceptMap>"
+						},
+						"url": {
+							"raw": "{{url}}/ConceptMap",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ConceptMap"
+							]
+						},
+						"description": "Unlike a PUT, which will update a resource if it doesn't already exist, a POST will only create a new resource. The resource body (XML in this case) and the URL must not specify an ID (the ID will be generated by the server)."
+					},
+					"response": []
+				},
+				{
+					"name": "Read a specific version of a Concept Map, in XML",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ConceptMap/v3-snomed-education-map/_history/1?_format=application/fhir+xml",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ConceptMap",
+								"v3-snomed-education-map",
+								"_history",
+								"1"
+							],
+							"query": [
+								{
+									"key": "_format",
+									"value": "application/fhir+xml"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a ConceptMap",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ConceptMap/v3-snomed-education-map",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ConceptMap",
+								"v3-snomed-education-map"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search for ConceptMaps with names containing 'edu'",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ConceptMap?name:contains=edu",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ConceptMap"
+							],
+							"query": [
+								{
+									"key": "name:contains",
+									"value": "edu"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Expand Examples",
+			"item": [
+				{
+					"name": "Expand implicit ValueSet (with filter)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/fhir+json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/fhir+json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/ValueSet/$expand?url=http://snomed.info/sct?fhir_vs=refset/723264001&count=10&filter=myot",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ValueSet",
+								"$expand"
+							],
+							"query": [
+								{
+									"key": "url",
+									"value": "http://snomed.info/sct?fhir_vs=refset/723264001"
+								},
+								{
+									"key": "count",
+									"value": "10"
+								},
+								{
+									"key": "filter",
+									"value": "myot"
+								}
+							]
+						},
+						"description": "This requests expands an implicit SNOMED CT ValueSet and applies a filter ('filter=met')\nOnly the first 10 results are requested ('count=10')\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Expand List of SCT-AU Reference Sets in JSON",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ValueSet/$expand?url=http%3A%2F%2Fsnomed.info%2Fsct%2F32506021000036107%3Ffhir_vs%3Drefset&_format=json",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ValueSet",
+								"$expand"
+							],
+							"query": [
+								{
+									"key": "url",
+									"value": "http%3A%2F%2Fsnomed.info%2Fsct%2F32506021000036107%3Ffhir_vs%3Drefset"
+								},
+								{
+									"key": "_format",
+									"value": "json"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Expand SCT-AU Medicinal product reference set in XML",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ValueSet/$expand?url=http%3A%2F%2Fsnomed.info%2Fsct%2F32506021000036107%3Ffhir_vs%3Drefset%2F929360061000036106&_format=xml",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ValueSet",
+								"$expand"
+							],
+							"query": [
+								{
+									"key": "url",
+									"value": "http%3A%2F%2Fsnomed.info%2Fsct%2F32506021000036107%3Ffhir_vs%3Drefset%2F929360061000036106"
+								},
+								{
+									"key": "_format",
+									"value": "xml"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Expand explicit ValueSet",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ValueSet/education-levels/$expand",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ValueSet",
+								"education-levels",
+								"$expand"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Expand implicit value set of all concepts subsumed by General Anaesthesia Procedure",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ValueSet/$expand?url=http://snomed.info/sct?fhir_vs=isa/50697003",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ValueSet",
+								"$expand"
+							],
+							"query": [
+								{
+									"key": "url",
+									"value": "http://snomed.info/sct?fhir_vs=isa/50697003"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Expand SCT-AU ValueSet with boost factors",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\": \"Parameters\",\n  \"parameter\": [{\n      \"name\": \"count\",\n      \"valueInteger\": 10\n    },\n    {\n      \"name\": \"filter\",\n      \"valueString\": \"aspirin\"\n    },\n    {\n      \"name\": \"valueSet\",\n      \"resource\": {\n        \"resourceType\": \"ValueSet\",\n        \"url\": \"http://csiro.au/example/ValueSet/boost1\",\n        \"compose\": {\n          \"include\": [{\n            \"system\": \"http://snomed.info/sct\",\n            \"filter\": [{\n              \"property\": \"concept\",\n              \"op\": \"is-a\",\n              \"value\": \"30560011000036108\"\n            }],\n            \"extension\": [{\n              \"url\": \"http://ontoserver.csiro.au/profiles/boost\",\n              \"valueDecimal\": 0.01\n            }]\n          }, {\n            \"system\": \"http://snomed.info/sct\",\n            \"filter\": [{\n              \"property\": \"concept\",\n              \"op\": \"is-a\",\n              \"value\": \"30404011000036106\"\n            }],\n            \"extension\": [{\n              \"url\": \"http://ontoserver.csiro.au/profiles/boost\",\n              \"valueDecimal\": 10.01\n            }]\n          }, {\n            \"valueSet\": [\n              \"http://snomed.info/sct?fhir_vs=refset/30513011000036104\"\n            ],\n            \"extension\": [{\n              \"url\": \"http://ontoserver.csiro.au/profiles/boost\",\n              \"valueDecimal\": 5.0\n            }]\n          }]\n        }\n      }\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{url}}/ValueSet/$expand",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ValueSet",
+								"$expand"
+							]
+						},
+						"description": "Expand a ValueSet where different elements of the ValueSet are modified by \"boost factors\".\n\nBosting factors are specified using the extension http://ontoserver.csiro.au/profiles/boost"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Lookup Examples",
+			"item": [
+				{
+					"name": "Lookup a SNOMED code",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/CodeSystem/$lookup?system=http://snomed.info/sct&code=263495000&_format=json",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"CodeSystem",
+								"$lookup"
+							],
+							"query": [
+								{
+									"key": "system",
+									"value": "http://snomed.info/sct"
+								},
+								{
+									"key": "code",
+									"value": "263495000"
+								},
+								{
+									"key": "_format",
+									"value": "json"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Lookup inactive status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/CodeSystem/$lookup?system=http://snomed.info/sct&code=268449009&property=inactive",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"CodeSystem",
+								"$lookup"
+							],
+							"query": [
+								{
+									"key": "system",
+									"value": "http://snomed.info/sct"
+								},
+								{
+									"key": "code",
+									"value": "268449009"
+								},
+								{
+									"key": "property",
+									"value": "inactive"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Lookup 2 properties: display and inactive status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/CodeSystem/$lookup?system=http://snomed.info/sct&code=268449009&property=inactive&property=display",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"CodeSystem",
+								"$lookup"
+							],
+							"query": [
+								{
+									"key": "system",
+									"value": "http://snomed.info/sct"
+								},
+								{
+									"key": "code",
+									"value": "268449009"
+								},
+								{
+									"key": "property",
+									"value": "inactive"
+								},
+								{
+									"key": "property",
+									"value": "display"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Lookup a code's inactive status using a Coding (POST)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/fhir+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\": \"Parameters\",\n  \"parameter\": [\n    {\n      \"name\": \"coding\",\n      \"valueCoding\": {\n        \"system\": \"http://snomed.info/sct\",\n        \"code\": \"268449009\"\n      }\n    },\n    {\n      \"name\": \"property\",\n      \"valueString\": \"inactive\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{url}}/CodeSystem/$lookup",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"CodeSystem",
+								"$lookup"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Translate Examples",
+			"item": [
+				{
+					"name": "Simple automap",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ConceptMap/$translate?fhir_vs&system=http://snomed.info/sct&code=90260006&target=http://hl7.org/fhir/ValueSet/substance-category&source=http://snomed.info/sct?fhir_vs",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ConceptMap",
+								"$translate"
+							],
+							"query": [
+								{
+									"key": "fhir_vs",
+									"value": null
+								},
+								{
+									"key": "system",
+									"value": "http://snomed.info/sct"
+								},
+								{
+									"key": "code",
+									"value": "90260006"
+								},
+								{
+									"key": "target",
+									"value": "http://hl7.org/fhir/ValueSet/substance-category"
+								},
+								{
+									"key": "source",
+									"value": "http://snomed.info/sct?fhir_vs"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SImple translate",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ConceptMap/102/$translate?code=ACNE&system=http://terminology.hl7.org/CodeSystem/v2-0487&target=http:/snomed.info/sct",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ConceptMap",
+								"102",
+								"$translate"
+							],
+							"query": [
+								{
+									"key": "code",
+									"value": "ACNE"
+								},
+								{
+									"key": "system",
+									"value": "http://terminology.hl7.org/CodeSystem/v2-0487"
+								},
+								{
+									"key": "target",
+									"value": "http:/snomed.info/sct"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "SImple translate in reverse",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ConceptMap/102/$translate?code=309068002&system=http://snomed.info/sct&reverse=true&target=http://terminology.hl7.org/CodeSystem/v2-0487",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ConceptMap",
+								"102",
+								"$translate"
+							],
+							"query": [
+								{
+									"key": "code",
+									"value": "309068002"
+								},
+								{
+									"key": "system",
+									"value": "http://snomed.info/sct"
+								},
+								{
+									"key": "reverse",
+									"value": "true"
+								},
+								{
+									"key": "target",
+									"value": "http://terminology.hl7.org/CodeSystem/v2-0487"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Validate Examples",
+			"item": [
+				{
+					"name": "Validate a ValueSet on the server",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ValueSet/v3-ActIncidentCode/$validate",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ValueSet",
+								"v3-ActIncidentCode",
+								"$validate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Validate a supplied ValueSet (JSON)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/fhir+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\" : \"ValueSet\",\n  \"id\" : \"v3-ActIncidentCode\",\n  \"meta\" : {\n    \"lastUpdated\" : \"2019-11-01T09:29:23.356+11:00\",\n    \"profile\" : [\"http://hl7.org/fhir/StructureDefinition/shareablevalueset\"]\n  },\n  \"text\" : {\n    \"status\" : \"generated\",\n    \"div\" : \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\"><h2>V3 Value SetActIncidentCode</h2><div><p>Set of codes indicating the type of incident or accident.</p>\\n</div><p>This value set includes codes from the following code systems:</p><ul><li>Include codes from <a href=\\\"../../v3/ActCode/cs.html\\\"><code>http://terminology.hl7.org/CodeSystem/v3-ActCode</code></a> where concept  is-a  <a href=\\\"../../v3/ActCode/cs.html#v3-ActCode-_ActIncidentCode\\\">_ActIncidentCode</a></li><li>Exclude these codes as defined in <a href=\\\"../../v3/ActCode/cs.html\\\"><code>http://terminology.hl7.org/CodeSystem/v3-ActCode</code></a><table class=\\\"none\\\"><tr><td style=\\\"white-space:nowrap\\\"><b>Code</b></td><td><b>Display</b></td></tr><tr><td><a href=\\\"../../v3/ActCode/cs.html#v3-ActCode-_ActIncidentCode\\\">_ActIncidentCode</a></td><td>ActIncidentCode</td><td>Set of codes indicating the type of incident or accident.</td></tr></table></li></ul></div>\"\n  },\n  \"extension\" : [{\n    \"url\" : \"http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status\",\n    \"valueCode\" : \"trial-use\"\n  },\n  {\n    \"url\" : \"http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm\",\n    \"valueInteger\" : 2\n  },\n  {\n    \"url\" : \"http://hl7.org/fhir/StructureDefinition/structuredefinition-wg\",\n    \"valueCode\" : \"fm\"\n  }],\n  \"url\" : \"http://terminology.hl7.org/ValueSet/v3-ActIncidentCode\",\n  \"identifier\" : [{\n    \"system\" : \"urn:ietf:rfc:3986\",\n    \"value\" : \"urn:oid:2.16.840.1.113883.1.11.16508\"\n  }],\n  \"version\" : \"2014-03-26\",\n  \"name\" : \"v3.ActIncidentCode\",\n  \"title\" : \"V3 Value SetActIncidentCode\",\n  \"status\" : \"active\",\n  \"experimental\" : false,\n  \"publisher\" : \"HL7 v3\",\n  \"contact\" : [{\n    \"telecom\" : [{\n      \"system\" : \"url\",\n      \"value\" : \"http://www.hl7.org\"\n    }]\n  }],\n  \"description\" : \" Set of codes indicating the type of incident or accident.\",\n  \"immutable\" : false,\n  \"compose\" : {\n    \"include\" : [{\n      \"system\" : \"http://terminology.hl7.org/CodeSystem/v3-ActCode\",\n      \"filter\" : [{\n        \"property\" : \"concept\",\n        \"op\" : \"is-a\",\n        \"value\" : \"_ActIncidentCode\"\n      }]\n    }],\n    \"exclude\" : [{\n      \"system\" : \"http://terminology.hl7.org/CodeSystem/v3-ActCode\",\n      \"concept\" : [{\n        \"code\" : \"_ActIncidentCode\"\n      }]\n    }]\n  }\n}"
+						},
+						"url": {
+							"raw": "{{url}}/ValueSet/$validate",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ValueSet",
+								"$validate"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Validate-Code Examples",
+			"item": [
+				{
+					"name": "Validate Code",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/fhir+json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/ValueSet/$validate-code?fhir_vs&display=foo&system=http://snomed.info/sct&code=122298005&url=http://snomed.info/sct?fhir_vs",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ValueSet",
+								"$validate-code"
+							],
+							"query": [
+								{
+									"key": "fhir_vs",
+									"value": null
+								},
+								{
+									"key": "display",
+									"value": "foo"
+								},
+								{
+									"key": "system",
+									"value": "http://snomed.info/sct"
+								},
+								{
+									"key": "code",
+									"value": "122298005"
+								},
+								{
+									"key": "url",
+									"value": "http://snomed.info/sct?fhir_vs"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check that a Coding exists in a SNOMED refset",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/fhir+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\": \"Parameters\",\n  \"parameter\": [\n    {\n      \"name\": \"url\",\n      \"valueUri\": \"http://snomed.info/sct?fhir_vs=refset/32570361000036108\"\n    },\n    {\n      \"name\": \"coding\",\n      \"valueCoding\": {\n        \"code\": \"241649002\",\n        \"system\": \"http://snomed.info/sct\"\n      }\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{url}}/ValueSet/$validate-code",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ValueSet",
+								"$validate-code"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ValueSet Examples",
+			"item": [
+				{
+					"name": "Search all ValueSets",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/fhir+json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/ValueSet",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ValueSet"
+							]
+						},
+						"description": "This sends a simple search request to the ValueSet endpoint to find all available ValueSet definitions."
+					},
+					"response": []
+				},
+				{
+					"name": "Search all ValueSets - summary results",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/fhir+json"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/ValueSet?_summary=true",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ValueSet"
+							],
+							"query": [
+								{
+									"key": "_summary",
+									"value": "true"
+								}
+							]
+						},
+						"description": "This sends a simple search request to the ValueSet endpoint to find all available ValueSet definitions."
+					},
+					"response": []
+				},
+				{
+					"name": "Create/Update a Value Set",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/fhir+json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/fhir+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\" : \"ValueSet\",\n  \"id\" : \"v3-ActIncidentCode\",\n  \"meta\" : {\n    \"lastUpdated\" : \"2019-11-01T09:29:23.356+11:00\",\n    \"profile\" : [\"http://hl7.org/fhir/StructureDefinition/shareablevalueset\"]\n  },\n  \"text\" : {\n    \"status\" : \"generated\",\n    \"div\" : \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\"><h2>V3 Value SetActIncidentCode</h2><div><p>Set of codes indicating the type of incident or accident.</p>\\n</div><p>This value set includes codes from the following code systems:</p><ul><li>Include codes from <a href=\\\"../../v3/ActCode/cs.html\\\"><code>http://terminology.hl7.org/CodeSystem/v3-ActCode</code></a> where concept  is-a  <a href=\\\"../../v3/ActCode/cs.html#v3-ActCode-_ActIncidentCode\\\">_ActIncidentCode</a></li><li>Exclude these codes as defined in <a href=\\\"../../v3/ActCode/cs.html\\\"><code>http://terminology.hl7.org/CodeSystem/v3-ActCode</code></a><table class=\\\"none\\\"><tr><td style=\\\"white-space:nowrap\\\"><b>Code</b></td><td><b>Display</b></td></tr><tr><td><a href=\\\"../../v3/ActCode/cs.html#v3-ActCode-_ActIncidentCode\\\">_ActIncidentCode</a></td><td>ActIncidentCode</td><td>Set of codes indicating the type of incident or accident.</td></tr></table></li></ul></div>\"\n  },\n  \"extension\" : [{\n    \"url\" : \"http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status\",\n    \"valueCode\" : \"trial-use\"\n  },\n  {\n    \"url\" : \"http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm\",\n    \"valueInteger\" : 2\n  },\n  {\n    \"url\" : \"http://hl7.org/fhir/StructureDefinition/structuredefinition-wg\",\n    \"valueCode\" : \"fm\"\n  }],\n  \"url\" : \"http://terminology.hl7.org/ValueSet/v3-ActIncidentCode\",\n  \"identifier\" : [{\n    \"system\" : \"urn:ietf:rfc:3986\",\n    \"value\" : \"urn:oid:2.16.840.1.113883.1.11.16508\"\n  }],\n  \"version\" : \"2014-03-26\",\n  \"name\" : \"v3.ActIncidentCode\",\n  \"title\" : \"V3 Value SetActIncidentCode\",\n  \"status\" : \"active\",\n  \"experimental\" : false,\n  \"publisher\" : \"HL7 v3\",\n  \"contact\" : [{\n    \"telecom\" : [{\n      \"system\" : \"url\",\n      \"value\" : \"http://www.hl7.org\"\n    }]\n  }],\n  \"description\" : \" Set of codes indicating the type of incident or accident.\",\n  \"immutable\" : false,\n  \"compose\" : {\n    \"include\" : [{\n      \"system\" : \"http://terminology.hl7.org/CodeSystem/v3-ActCode\",\n      \"filter\" : [{\n        \"property\" : \"concept\",\n        \"op\" : \"is-a\",\n        \"value\" : \"_ActIncidentCode\"\n      }]\n    }],\n    \"exclude\" : [{\n      \"system\" : \"http://terminology.hl7.org/CodeSystem/v3-ActCode\",\n      \"concept\" : [{\n        \"code\" : \"_ActIncidentCode\"\n      }]\n    }]\n  }\n}"
+						},
+						"url": {
+							"raw": "{{url}}/ValueSet/v3-ActIncidentCode",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ValueSet",
+								"v3-ActIncidentCode"
+							]
+						},
+						"description": "This creates a ValueSet\n(or updates it, if it already exists)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a ValueSet",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ValueSet/v3-ActIncidentCode",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ValueSet",
+								"v3-ActIncidentCode"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search all ValueSets by title",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ValueSet?title=v3",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ValueSet"
+							],
+							"query": [
+								{
+									"key": "title",
+									"value": "v3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create/Update a ValueSet using a filter and excludes",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/fhir+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\": \"ValueSet\",\n  \"url\": \"http://csiro.au/ValueSet/education-levels\",\n  \"version\": \"2\",\n  \"name\": \"edu.level\",\n  \"title\": \"Education Levels\",\n  \"status\": \"draft\",\n  \"compose\": {\n    \"include\": [\n      {\n        \"filter\": [\n          {\n            \"property\": \"concept\",\n            \"op\": \"is-a\",\n            \"value\": \"365460000\"\n          }\n        ],\n        \"system\": \"http://snomed.info/sct\",\n        \"version\": \"http://snomed.info/sct/32506021000036107/version/20160630\"\n      }\n    ],\n    \"exclude\": [\n      {\n        \"concept\": [\n          {\n            \"code\": \"224298008\"\n          },\n          {\n            \"code\": \"365460000\"\n          },\n          {\n            \"code\": \"473462005\"\n          },\n          {\n            \"code\": \"424587006\"\n          }\n        ],\n        \"system\": \"http://snomed.info/sct\",\n        \"version\": \"http://snomed.info/sct/32506021000036107/version/20160630\"\n      }\n    ]\n  },\n  \"description\": \"A selection of Education Levels\",\n  \"text\": {\n    \"status\": \"generated\",\n    \"div\": \"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\"><h2>Education Levels</h2><tt>http://csiro.au/ValueSet/education-levels</tt><p>A selection of Education Levels</p></div>\"\n  },\n  \"experimental\": true,\n  \"date\": \"2020-01-29\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/ValueSet/education-levels",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ValueSet",
+								"education-levels"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
